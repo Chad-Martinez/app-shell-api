@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import { config } from 'dotenv';
 import cors from 'cors';
 import { HttpException } from './types/HttpException';
+import authRoutes from './routes/auth-routes';
 
 config();
 
@@ -26,6 +27,8 @@ app.use(
   })
 );
 app.use(bodyParser.json());
+
+app.use('/api/auth', authRoutes);
 
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
   if (error instanceof HttpException) {
