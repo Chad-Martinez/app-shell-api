@@ -3,6 +3,10 @@ import bcrypt from 'bcrypt';
 import User from '../models/User';
 import { IUser } from '../types/User.interface';
 import { HttpException } from '../types/HttpException';
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from '../utils/token-utils';
 
 type RegisterRequest = {
   email: IUser['email'];
@@ -74,11 +78,20 @@ const login = async (
       const error: HttpException = loginError;
       throw error;
     }
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
 
-    res.status(200).json({
-      userId: user.id,
-      message: 'Login Successful!',
-    });
+    const expires = new Date();
+    expires.setDate(expires.getDate() + 14);
+
+    res
+      .status(200)
+      .cookie('AT', accessToken)
+      .cookie('RT', refreshToken, { expires: expires })
+      .json({
+        userId: user.id,
+        message: 'Login Successful!',
+      });
   } catch (error: unknown) {
     console.log(error);
     if (error instanceof HttpException) {
