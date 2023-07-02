@@ -12,6 +12,13 @@ type RegisterRequest = {
   roles: IUser['roles'];
 };
 
+type LoginRequest = {
+  email: IUser['email'];
+  password: IUser['password'];
+};
+
+const loginError = new HttpException(401, 'Email or password is incorrect');
+
 const register = async (req: Request, res: Response, next: NextFunction) => {
   const { email, password, firstName, lastName } = <RegisterRequest>req.body;
 
@@ -36,7 +43,43 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
       message: 'User created. Please verify your email to login',
       userId: createdUser._id,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    console.log(error);
+    if (error instanceof HttpException) {
+      console.log(error);
+      error.status || 500;
+      error.message || 'Internal Error. Try your request again.';
+    }
+    next(error);
+  }
+};
+
+const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<any> => {
+  const { email, password } = <LoginRequest>req.body;
+  try {
+    const user: IUser | null = await User.findOne({ email: email });
+    if (!user) {
+      const error: HttpException = loginError;
+      throw error;
+    }
+    const isValidPassword: boolean = await bcrypt.compare(
+      password,
+      user.password
+    );
+    if (!isValidPassword) {
+      const error: HttpException = loginError;
+      throw error;
+    }
+
+    res.status(200).json({
+      userId: user.id,
+      message: 'Login Successful!',
+    });
+  } catch (error: unknown) {
     console.log(error);
     if (error instanceof HttpException) {
       console.log(error);
@@ -49,4 +92,5 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
 
 export default {
   register,
+  login,
 };
