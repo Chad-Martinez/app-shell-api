@@ -30,18 +30,14 @@ const saveUserToken = async (
 };
 
 export const generateAccessToken = (user: IUser): string => {
-  const payload = { userId: user._id, email: user.email, roles: user.roles };
+  const payload = { sub: user._id, email: user.email, roles: user.roles };
   const accessToken = jwt.sign(payload, ACCESS_KEY, { expiresIn: '15m' });
 
   return accessToken;
 };
 
 export const generateRefreshToken = (user: IUser): string => {
-  const payload: { userId: string; email: string } = {
-    userId: user._id,
-    email: user.email,
-  };
-  const refreshToken = jwt.sign({ sub: payload }, REFRESH_KEY, {
+  const refreshToken = jwt.sign({ sub: user._id }, REFRESH_KEY, {
     expiresIn: '15d',
   });
 

@@ -5,7 +5,7 @@ import { v4 as uuidV4 } from 'uuid';
 const userTokenSchema: Schema<IUserToken> = new Schema({
   userId: { type: Schema.Types.ObjectId, required: true },
   refreshToken: { type: String, required: true },
-  tokenFamily: { type: String, default: uuidV4() },
+  family: { type: String, default: uuidV4(), required: true },
   createdAt: { type: Date, default: Date.now },
 });
 

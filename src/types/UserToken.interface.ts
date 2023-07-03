@@ -4,6 +4,6 @@ import { Schema } from 'mongoose';
 export interface IUserToken extends Document {
   userId: Schema.Types.ObjectId;
   refreshToken: string;
-  tokenFamily: string;
+  family: string;
   createdAt: Date;
 }
