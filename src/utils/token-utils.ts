@@ -3,6 +3,7 @@ import UserToken from '../models/UserToken';
 import { IUserToken } from '../types/UserToken.interface';
 import { config } from 'dotenv';
 import { IUser } from '../types/User.interface';
+import { HttpException } from '../types/HttpException';
 
 config();
 
@@ -36,10 +37,30 @@ export const generateAccessToken = (user: IUser): string => {
 };
 
 export const generateRefreshToken = (user: IUser): string => {
-  const payload = { userId: user._id, email: user.email };
-  const refreshToken = jwt.sign(payload, REFRESH_KEY, { expiresIn: '15d' });
+  const payload: { userId: string; email: string } = {
+    userId: user._id,
+    email: user.email,
+  };
+  const refreshToken = jwt.sign({ sub: payload }, REFRESH_KEY, {
+    expiresIn: '15d',
+  });
 
   saveUserToken(user._id, refreshToken);
 
   return refreshToken;
+};
+
+export const invalidateRefreshToken = async (refreshToken: string) => {
+  try {
+    await UserToken.deleteMany({
+      refreshToken: refreshToken,
+    });
+  } catch (error: unknown) {
+    console.log(error);
+    if (error instanceof HttpException) {
+      console.log(error);
+      error.status || 500;
+      error.message || 'Internal Error. Try your request again.';
+    }
+  }
 };

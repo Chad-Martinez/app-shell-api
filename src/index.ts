@@ -5,14 +5,17 @@ import mongoose from 'mongoose';
 import { config } from 'dotenv';
 import cors from 'cors';
 import { HttpException } from './types/HttpException';
+import cookiesMiddleware from 'universal-cookie-express';
 import authRoutes from './routes/auth-routes';
+
+const PORT = process.env.DEV_PORT;
+const MONGODB_URI = process.env.DB_CONNECTION;
 
 config();
 
 const app: Express = express();
 
-const PORT = process.env.DEV_PORT;
-const MONGODB_URI = process.env.DB_CONNECTION;
+app.use(cookiesMiddleware());
 
 app.use(
   cors({
