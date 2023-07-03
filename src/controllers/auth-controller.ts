@@ -6,7 +6,9 @@ import { HttpException } from '../types/HttpException';
 import {
   generateAccessToken,
   generateRefreshToken,
+  invalidateRefreshToken,
 } from '../utils/token-utils';
+import { ICookieRequest } from '../types/CookieRequeset.interface';
 
 type RegisterRequest = {
   email: IUser['email'];
@@ -103,7 +105,30 @@ const login = async (
   }
 };
 
+const logout = async (
+  req: ICookieRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const refreshToken: string | null | undefined =
+      req.universalCookies?.get('RT');
+    if (!refreshToken) return;
+    await invalidateRefreshToken(refreshToken);
+    res.status(200).json({ message: 'Logout Successful!' });
+  } catch (error: unknown) {
+    console.log(error);
+    if (error instanceof HttpException) {
+      console.log(error);
+      error.status || 500;
+      error.message || 'Internal Error. Try your request again.';
+    }
+    next(error);
+  }
+};
+
 export default {
   register,
   login,
+  logout,
 };
