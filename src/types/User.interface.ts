@@ -6,6 +6,7 @@ export interface IUser extends Document {
   firstName: string;
   lastName: string;
   roles?: Array<string>;
+  refreshToken: Array<string>;
   dateCreated?: Date;
   dateUpdated?: Date;
 }
