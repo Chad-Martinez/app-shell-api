@@ -24,6 +24,9 @@ const userSchema: Schema = new Schema({
     enum: ['admin', 'user'],
     default: ['user'],
   },
+  refreshToken: {
+    type: [String],
+  },
   dateCreated: {
     type: Date,
     default: Date.now,

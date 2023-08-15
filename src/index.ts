@@ -7,6 +7,7 @@ import cors from 'cors';
 import { HttpException } from './types/HttpException';
 import cookiesMiddleware from 'universal-cookie-express';
 import authRoutes from './routes/auth-routes';
+import adminRoutes from './routes/admin-routes';
 
 const PORT = process.env.DEV_PORT;
 const MONGODB_URI = process.env.DB_CONNECTION;
@@ -32,12 +33,21 @@ app.use(
 app.use(bodyParser.json());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
   if (error instanceof HttpException) {
     console.log(error);
     const status = error.status || 500;
     const message = error.message;
+
+    if (status === 401 || status === 403)
+      return res
+        .status(status)
+        .clearCookie('AT')
+        .clearCookie('RT')
+        .json({ message: message });
+
     return res.status(status).json({ message: message });
   }
 });
@@ -48,4 +58,4 @@ mongoose
     app.listen(PORT!);
     console.log('AUTH SHELL API IS RUNNING', PORT);
   })
-  .catch((err: Error) => console.log(err));
+  .catch((error: Error) => console.log(error));

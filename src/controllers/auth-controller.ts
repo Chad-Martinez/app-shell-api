@@ -6,6 +6,7 @@ import { HttpException } from '../types/HttpException';
 import {
   generateAccessToken,
   generateRefreshToken,
+  saveUserToken,
   invalidateRefreshToken,
 } from '../utils/token-utils';
 import { ICookieRequest } from '../types/CookieRequeset.interface';
@@ -43,6 +44,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
       password: hashedPassword,
       firstName,
       lastName,
+      refreshToken: [],
     });
     const createdUser = await user.save();
     res.status(201).json({
@@ -52,7 +54,6 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
   } catch (error: unknown) {
     console.log(error);
     if (error instanceof HttpException) {
-      console.log(error);
       error.status || 500;
       error.message || 'Internal Error. Try your request again.';
     }
@@ -82,6 +83,7 @@ const login = async (
     }
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
+    await saveUserToken(user, refreshToken);
 
     const expires = new Date();
     expires.setDate(expires.getDate() + 14);
@@ -97,7 +99,6 @@ const login = async (
   } catch (error: unknown) {
     console.log(error);
     if (error instanceof HttpException) {
-      console.log(error);
       error.status || 500;
       error.message || 'Internal Error. Try your request again.';
     }
@@ -115,11 +116,14 @@ const logout = async (
       req.universalCookies?.get('RT');
     if (!refreshToken) return;
     await invalidateRefreshToken(refreshToken);
-    res.status(200).json({ message: 'Logout Successful!' });
+    res
+      .status(200)
+      .clearCookie('AT')
+      .clearCookie('RT')
+      .json({ message: 'Logout Successful!' });
   } catch (error: unknown) {
     console.log(error);
     if (error instanceof HttpException) {
-      console.log(error);
       error.status || 500;
       error.message || 'Internal Error. Try your request again.';
     }
