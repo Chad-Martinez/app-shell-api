@@ -16,7 +16,7 @@ type RegisterRequest = {
   password: IUser['password'];
   firstName: IUser['firstName'];
   lastName: IUser['lastName'];
-  roles: IUser['roles'];
+  role: IUser['role'];
 };
 
 type LoginRequest = {
@@ -94,6 +94,10 @@ const login = async (
       .cookie('RT', refreshToken, { expires: expires })
       .json({
         userId: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
         message: 'Login Successful!',
       });
   } catch (error: unknown) {

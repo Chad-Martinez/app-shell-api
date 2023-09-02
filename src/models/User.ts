@@ -19,10 +19,9 @@ const userSchema: Schema = new Schema({
     type: String,
     required: true,
   },
-  roles: {
-    type: [String],
-    enum: ['admin', 'user'],
-    default: ['user'],
+  role: {
+    type: String,
+    default: 'USER',
   },
   refreshToken: {
     type: [String],
