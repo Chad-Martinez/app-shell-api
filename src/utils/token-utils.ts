@@ -25,7 +25,7 @@ export const saveUserToken = async (
 };
 
 export const generateAccessToken = (user: IUser): string => {
-  const payload = { sub: user._id, email: user.email, roles: user.roles };
+  const payload = { sub: user._id, email: user.email, role: user.role };
   const accessToken = jwt.sign(payload, ACCESS_KEY, { expiresIn: '15m' });
 
   return accessToken;
