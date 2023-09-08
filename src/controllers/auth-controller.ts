@@ -16,6 +16,7 @@ type RegisterRequest = {
   password: IUser['password'];
   firstName: IUser['firstName'];
   lastName: IUser['lastName'];
+  phone?: IUser['phone'];
   role: IUser['role'];
 };
 
@@ -24,10 +25,10 @@ type LoginRequest = {
   password: IUser['password'];
 };
 
-const loginError = new HttpException(401, 'Email or password is incorrect');
-
 const register = async (req: Request, res: Response, next: NextFunction) => {
-  const { email, password, firstName, lastName } = <RegisterRequest>req.body;
+  const { email, password, firstName, lastName, phone } = <RegisterRequest>(
+    req.body
+  );
 
   try {
     const isDuplicateEamil = await User.findOne({ email: email });
@@ -44,12 +45,12 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
       password: hashedPassword,
       firstName,
       lastName,
+      phone: phone && phone,
       refreshToken: [],
     });
     const createdUser = await user.save();
     res.status(201).json({
       message: 'User created. Please verify your email to login',
-      userId: createdUser._id,
     });
   } catch (error: unknown) {
     console.log(error);
@@ -67,6 +68,8 @@ const login = async (
   next: NextFunction
 ): Promise<any> => {
   const { email, password } = <LoginRequest>req.body;
+  const loginError = new HttpException(401, 'Email or password is incorrect');
+
   try {
     const user: IUser | null = await User.findOne({ email: email });
     if (!user) {
