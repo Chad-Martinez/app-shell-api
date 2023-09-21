@@ -1,14 +1,9 @@
-import jwt, { JwtPayload, Secret } from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import User from '../models/User';
-import { config } from 'dotenv';
 import { IUser } from '../types/User.interface';
 import { HttpException } from '../types/HttpException';
 import { Types } from 'mongoose';
-
-config();
-
-const ACCESS_KEY: Secret = process.env.ACCESS_TOKEN_PRIVATE_KEY!;
-const REFRESH_KEY: Secret = process.env.REFRESH_TOKEN_PRIVATE_KEY!;
+import { ACCESS_KEY, REFRESH_KEY } from './env-utils';
 
 export const saveUserToken = async (
   user: IUser,
