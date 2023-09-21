@@ -29,6 +29,10 @@ const userSchema: Schema = new Schema({
   refreshToken: {
     type: [String],
   },
+  isEmailVerified: {
+    type: Boolean,
+    default: false,
+  },
   dateCreated: {
     type: Date,
     default: Date.now,

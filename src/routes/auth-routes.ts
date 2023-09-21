@@ -9,4 +9,6 @@ router.post('/login', authController.login);
 
 router.post('/logout', authController.logout);
 
+router.put('/verify/:verifyId', authController.verify);
+
 export default module.exports = router;
