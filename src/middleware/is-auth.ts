@@ -19,52 +19,47 @@ export const isAuth = async (
     req.universalCookies?.get('RT');
 
   try {
+
     if (!accessToken || !refreshToken)
       throw new HttpException(401, 'Unauthorized Request');
 
-    let newAccessToken: string = '';
-    let newRefreshToken: string = '';
-
     const isValidAccessToken: boolean = validateAccessToken(accessToken);
 
-    if (isValidAccessToken) {
-      const { rotatedAccessToken, rotatedRefreshToken } = await rotateTokens(
-        refreshToken
-      );
-
-      newAccessToken = rotatedAccessToken;
-      newRefreshToken = rotatedRefreshToken;
-    }
+    if (isValidAccessToken) return next();
 
     if (!isValidAccessToken) {
-      if (!refreshToken) {
-        throw new HttpException(401, 'Unauthorized Request');
-      }
-
       const isValidRefreshToken: boolean = await validateRefreshToken(
         refreshToken
       );
+
+      if (!isValidRefreshToken) {
+        throw new HttpException(401, 'Unauthorized Request');
+      }
 
       if (isValidRefreshToken) {
         const { rotatedAccessToken, rotatedRefreshToken } = await rotateTokens(
           refreshToken
         );
-        newAccessToken = rotatedAccessToken;
-        newRefreshToken = rotatedRefreshToken;
-      }
 
-      if (!isValidRefreshToken) {
-        throw new HttpException(401, 'Unauthorized Request');
+        const expires: Date = new Date();
+        const accessExpires: Date = new Date(expires.getTime() + 10 * 60000);
+        const refreshExpires: Date = new Date();
+        refreshExpires.setDate(refreshExpires.getDate() + 14);
+
+        res
+          .cookie('AT', rotatedAccessToken, {
+            httpOnly: true,
+            expires: accessExpires,
+            secure: true,
+          })
+          .cookie('RT', rotatedRefreshToken, {
+            httpOnly: true,
+            expires: refreshExpires,
+            secure: true,
+          });
+        next();
       }
     }
-
-    const expires: Date = new Date();
-    expires.setDate(expires.getDate() + 14);
-
-    res
-      .cookie('AT', newAccessToken)
-      .cookie('RT', newRefreshToken, { expires: expires });
-    next();
   } catch (error: unknown) {
     console.log(error);
     if (error instanceof HttpException) {

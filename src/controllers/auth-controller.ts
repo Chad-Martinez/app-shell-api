@@ -146,18 +146,30 @@ const login = async (
     const refreshToken = generateRefreshToken(user);
     await saveUserToken(user, refreshToken);
 
-    const expires = new Date();
-    expires.setDate(expires.getDate() + 14);
+    const expires: Date = new Date();
+    const accessExpires: Date = new Date(expires.getTime() + 10 * 60000);
+    const refreshExpires: Date = new Date();
+    refreshExpires.setDate(refreshExpires.getDate() + 14);
 
     res
       .status(200)
-      .cookie('AT', accessToken)
-      .cookie('RT', refreshToken, { expires: expires })
+      .cookie('AT', accessToken, {
+        httpOnly: true,
+        secure: true,
+        expires: accessExpires,
+      })
+      .cookie('RT', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        expires: refreshExpires,
+      })
       .json({
         userId: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        phone: user.phone,
+        isEmailVerified: user.isEmailVerified,
         role: user.role,
         message: 'Login Successful!',
       });
