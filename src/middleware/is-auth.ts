@@ -37,9 +37,11 @@ export const isAuth = async (
       }
 
       if (isValidRefreshToken) {
-        const { rotatedAccessToken, rotatedRefreshToken } = await rotateTokens(
-          refreshToken
-        );
+        const {
+          rotatedAccessToken,
+          rotatedRefreshToken,
+        }: { rotatedAccessToken: string; rotatedRefreshToken: string } =
+          await rotateTokens(refreshToken);
 
         const expires: Date = new Date();
         const accessExpires: Date = new Date(expires.getTime() + 10 * 60000);

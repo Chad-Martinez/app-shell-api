@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from 'express';
+import { RequestHandler } from 'express';
 import { HttpException } from '../types/HttpException';
 
-const getResource = async (req: Request, res: Response, next: NextFunction) => {
+const getResource: RequestHandler = async (req, res, next): Promise<void> => {
   try {
     //ADMIN RESOURCE LOGIC...
 
