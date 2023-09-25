@@ -11,7 +11,10 @@ export const saveUserToken = async (
 ): Promise<void> => {
   try {
     const { refreshToken }: { refreshToken: IUser['refreshToken'] } = user;
-    const updatedRefreshTokenArray = [...refreshToken, newRefreshToken];
+    const updatedRefreshTokenArray: IUser['refreshToken'] = [
+      ...refreshToken,
+      newRefreshToken,
+    ];
     user.refreshToken = updatedRefreshTokenArray;
     await user.save();
   } catch (error: unknown) {
@@ -20,8 +23,14 @@ export const saveUserToken = async (
 };
 
 export const generateAccessToken = (user: IUser): string => {
-  const payload = { sub: user._id, email: user.email, role: user.role };
-  const accessToken = jwt.sign(payload, ACCESS_KEY, { expiresIn: '15m' });
+  const payload: JwtPayload = {
+    sub: user._id,
+    email: user.email,
+    role: user.role,
+  };
+  const accessToken: string = jwt.sign(payload, ACCESS_KEY, {
+    expiresIn: '15m',
+  });
 
   return accessToken;
 };

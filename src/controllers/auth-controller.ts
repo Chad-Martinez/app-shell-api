@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import nodemailer, { Transporter } from 'nodemailer';
 const sendgridTransport = require('nodemailer-sendgrid-transport');
 import path from 'path';
-import jwt, { JsonWebTokenError } from 'jsonwebtoken';
+import jwt, { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
 import Handlebars from 'handlebars';
 import User from '../models/User';
 import { IUser } from '../types/User.interface';
@@ -39,13 +39,13 @@ type LoginRequest = {
   password: IUser['password'];
 };
 
-const register = async (req: Request, res: Response, next: NextFunction) => {
+const register: RequestHandler = async (req, res, next): Promise<void> => {
   const { email, password, firstName, lastName, phone } = <RegisterRequest>(
     req.body
   );
 
   try {
-    const isDuplicateEamil = await User.findOne({ email: email });
+    const isDuplicateEamil: IUser | null = await User.findOne({ email: email });
 
     if (isDuplicateEamil) {
       const error = new HttpException(
@@ -90,9 +90,10 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
       JWT_SECRET
     );
 
-    const template = Handlebars.compile(emailSource);
+    const template: HandlebarsTemplateDelegate<any> =
+      Handlebars.compile(emailSource);
 
-    const replacements = {
+    const replacements: { name: string; link: string; website: string } = {
       name: firstName,
       link: `${REGISTER_LINK}${token}`,
       website: WEBSITE,
@@ -120,11 +121,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const login = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<any> => {
+const login: RequestHandler = async (req, res, next): Promise<void> => {
   const { email, password } = <LoginRequest>req.body;
   const loginError = new HttpException(401, 'Email or password is incorrect');
 
@@ -142,8 +139,8 @@ const login = async (
       const error: HttpException = loginError;
       throw error;
     }
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+    const accessToken: string = generateAccessToken(user);
+    const refreshToken: string = generateRefreshToken(user);
     await saveUserToken(user, refreshToken);
 
     const expires: Date = new Date();
@@ -187,7 +184,7 @@ const logout = async (
   req: ICookieRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const refreshToken: string | null | undefined =
       req.universalCookies?.get('RT');
@@ -208,11 +205,11 @@ const logout = async (
   }
 };
 
-const verify: RequestHandler = async (req, res, next) => {
+const verify: RequestHandler = async (req, res, next): Promise<void> => {
   const verifyId = (req.params as { verifyId: string }).verifyId;
 
   try {
-    const decodedToken = jwt.verify(verifyId, JWT_SECRET);
+    const decodedToken: string | JwtPayload = jwt.verify(verifyId, JWT_SECRET);
 
     const { email } = decodedToken as VerifyEmailToken;
 

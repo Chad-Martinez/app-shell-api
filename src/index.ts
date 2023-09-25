@@ -9,8 +9,8 @@ import cookiesMiddleware from 'universal-cookie-express';
 import authRoutes from './routes/auth-routes';
 import adminRoutes from './routes/admin-routes';
 
-const PORT = process.env.DEV_PORT;
-const MONGODB_URI = process.env.DB_CONNECTION;
+const PORT: string = process.env.DEV_PORT!;
+const MONGODB_URI: string = process.env.DB_CONNECTION!;
 
 config();
 
@@ -48,7 +48,7 @@ app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
         .clearCookie('RT')
         .json({ message: message });
 
-    return res.status(status).json({ message: message });
+    res.status(status).json({ message: message });
   }
 });
 
