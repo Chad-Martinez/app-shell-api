@@ -1,4 +1,4 @@
-import { NextFunction, Request, RequestHandler, Response } from 'express';
+import { NextFunction, RequestHandler, Response } from 'express';
 import bcrypt from 'bcrypt';
 import nodemailer, { Transporter } from 'nodemailer';
 const sendgridTransport = require('nodemailer-sendgrid-transport');
