@@ -109,7 +109,8 @@ const register: RequestHandler = async (req, res, next): Promise<void> => {
     });
 
     res.status(201).json({
-      message: 'User created. Please verify your email to login',
+      message:
+        'Account created and an email verification request has been sent.',
     });
   } catch (error: unknown) {
     console.log(error);
@@ -213,13 +214,13 @@ const verify: RequestHandler = async (req, res, next): Promise<void> => {
 
     const { email } = decodedToken as VerifyEmailToken;
 
-    const user = await User.findOne({ email: email });
+    const user: IUser | null = await User.findOne({ email: email });
 
     if (!user) {
       throw new Error('A user with that email could not be found');
     }
 
-    user.isVerified = true;
+    user.isEmailVerified = true;
     await user.save();
 
     res.status(200).json({
